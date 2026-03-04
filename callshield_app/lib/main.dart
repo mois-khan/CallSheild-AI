@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'services/alert_service.dart';
+import 'services/storage_service.dart';
+import 'history_screen.dart';
 
 void main() {
-  runApp(const CallShieldApp());
+  runApp(const MyApp());
 }
 
-class CallShieldApp extends StatelessWidget {
-  const CallShieldApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CallShield-AI',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        // Applying our "Midnight Neural" Theme globally
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        textTheme: GoogleFonts.plusJakartaSansTextTheme(
+          ThemeData.dark().textTheme,
+        ),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF6366F1), // Electric Indigo
+          surface: Color(0xFF1E293B),
+        ),
+      ),
       home: const AlertScreen(),
     );
   }
@@ -31,10 +41,11 @@ class AlertScreen extends StatefulWidget {
 
 class _AlertScreenState extends State<AlertScreen> {
   final AlertService _alertService = AlertService();
-  final String currentNgrokUrl = "https://concavely-inflationary-eddy.ngrok-free.dev";
+  final StorageService _storageService = StorageService();
+  final String currentNgrokUrl = "https://concavely-inflationary-eddy.ngrok-free.dev"; // 🚨 UPDATE THIS
 
-  // 🚨 NEW: State variable to track if the alert is minimized
   bool _isMinimized = false;
+  String _lastSavedExplanation = ""; // Prevents saving duplicates on UI rebuilds
 
   @override
   void initState() {
@@ -53,42 +64,58 @@ class _AlertScreenState extends State<AlertScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CallShield-AI', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.grey[200],
+        backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Color(0xFF6366F1)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
+              );
+            },
+          )
+        ],
       ),
       body: StreamBuilder<Map<String, dynamic>>(
         stream: _alertService.alertStream,
         builder: (context, snapshot) {
-
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)));
           }
 
           final payload = snapshot.data!;
 
+          // SAFE STATE
           if (payload['type'] == 'SYSTEM') {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.shield, color: Colors.green, size: 80),
+                  const Icon(Icons.security, color: Color(0xFF6366F1), size: 100), // Neural Shield vibe
                   const SizedBox(height: 20),
                   Text(payload['message'] ?? 'Monitoring Active',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF6366F1))),
                 ],
               ),
             );
           }
 
+          // ALERT STATE
           if (payload['type'] == 'ALERT') {
             bool isCritical = payload['threatLevel'] == 'CRITICAL';
-            Color warningColor = isCritical ? Colors.red.shade700 : Colors.orange.shade700;
+            Color warningColor = isCritical ? const Color(0xFFEF4444) : const Color(0xFFF59E0B);
 
-            // 🔽 MINIMIZED STATE UI 🔽
+            // Save to local storage (Only if it's a new alert to prevent duplicates)
+            if (_lastSavedExplanation != payload['explanation']) {
+              _storageService.saveAlert(payload);
+              _lastSavedExplanation = payload['explanation'];
+            }
+
             if (_isMinimized) {
               return Column(
                 children: [
-                  // The Minimized Banner
                   Container(
                     width: double.infinity,
                     color: warningColor,
@@ -106,19 +133,14 @@ class _AlertScreenState extends State<AlertScreen> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.open_in_full, color: Colors.white),
-                          onPressed: () {
-                            setState(() {
-                              _isMinimized = false; // Maximize it!
-                            });
-                          },
+                          onPressed: () => setState(() => _isMinimized = false),
                         )
                       ],
                     ),
                   ),
-                  // The rest of your app can go down here while minimized!
                   const Expanded(
                     child: Center(
-                      child: Text("App is minimized. Call is still being monitored.",
+                      child: Text("App is minimized. Monitoring active.",
                           style: TextStyle(color: Colors.grey)),
                     ),
                   )
@@ -126,7 +148,6 @@ class _AlertScreenState extends State<AlertScreen> {
               );
             }
 
-            // 🔼 FULL SCREEN (MAXIMIZED) UI 🔼
             return Container(
               width: double.infinity,
               color: warningColor,
@@ -134,16 +155,11 @@ class _AlertScreenState extends State<AlertScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Collapse Button at the top right
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
                       icon: const Icon(Icons.close_fullscreen, color: Colors.white, size: 30),
-                      onPressed: () {
-                        setState(() {
-                          _isMinimized = true; // Minimize it!
-                        });
-                      },
+                      onPressed: () => setState(() => _isMinimized = true),
                     ),
                   ),
                   const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 100),
@@ -155,15 +171,21 @@ class _AlertScreenState extends State<AlertScreen> {
                   ),
                   const SizedBox(height: 20),
                   Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A), // Dark slate inside the red
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Column(
                       children: [
                         Text('Scam Probability: ${payload['probability']}%',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const Divider(),
-                        Text('Reason: ${payload['explanation']}',
-                            style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Divider(color: Colors.white24),
+                        ),
+                        Text('${payload['explanation']}',
+                            style: const TextStyle(fontSize: 16, color: Colors.white70), textAlign: TextAlign.center),
                       ],
                     ),
                   ),
@@ -171,7 +193,6 @@ class _AlertScreenState extends State<AlertScreen> {
               ),
             );
           }
-
           return const SizedBox.shrink();
         },
       ),
