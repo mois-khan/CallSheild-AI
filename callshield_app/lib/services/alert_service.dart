@@ -5,6 +5,22 @@ import 'smart_alert_engine.dart';
 import 'hardware_alert_service.dart';
 
 class AlertService {
+
+  // Add this boolean to track the state
+  bool isMonitoring = true;
+
+  // Add this function to send the command to Node.js
+  void toggleMonitoring() {
+    isMonitoring = !isMonitoring;
+    final action = isMonitoring ? 'resume_monitoring' : 'pause_monitoring';
+
+    // Send the JSON command UP the WebSocket to the Node.js server
+    if (_channel != null) {
+      _channel!.sink.add(jsonEncode({'action': action}));
+      print("Sent to Backend: $action");
+    }
+  }
+
   WebSocketChannel? _channel;
   final StreamController<Map<String, dynamic>> _alertController = StreamController<Map<String, dynamic>>.broadcast();
 

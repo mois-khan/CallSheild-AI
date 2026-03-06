@@ -6,6 +6,8 @@ const http = require('http');
 const WebSocket = require('ws');
 const bodyParser = require('body-parser');
 
+const { setMonitoringState } = require('./state');
+
 const callRoutes = require('./routes/callRoutes');
 const { handleStream } = require('./services/streamHandler');
 
@@ -52,6 +54,21 @@ wss.on('connection', (ws, req) => {
 
         // Send a handshake so the app knows it connected successfully
         ws.send(JSON.stringify({ type: "SYSTEM", message: "Monitoring Active" }));
+
+        // 🚨 NEW: Listen for messages coming UP from the Flutter app
+        ws.on('message', (message) => {
+            try {
+                const data = JSON.parse(message);
+                
+                if (data.action === 'pause_monitoring') {
+                    setMonitoringState(false);
+                } else if (data.action === 'resume_monitoring') {
+                    setMonitoringState(true);
+                }
+            } catch (error) {
+                console.error('Error reading command from Flutter:', error);
+            }
+        });
 
         ws.on('close', () => {
             console.log('📱 Flutter App Disconnected.');

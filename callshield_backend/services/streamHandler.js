@@ -1,5 +1,6 @@
 require('dotenv').config(); 
 const WebSocket = require('ws');
+const { getMonitoringState, setMonitoringState } = require('../state');
 
 const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 
@@ -157,18 +158,30 @@ const handleStream = (ws, broadcastFn) => {
         try {
             const msg = JSON.parse(message);
 
+            // 🚨 1. RESET SHIELD ON NEW CALL
+            if (msg.event === 'start') {
+                console.log('📞 New call started. Resetting shield to ACTIVE.');
+                setMonitoringState(true); 
+            }
+
+            // 🚨 2. THE GATEKEEPER
             if (msg.event === 'media' && msg.media.payload) {
-                const track = msg.media.track; 
-                
-                // Decode the base64 payload into raw binary bytes
-                const rawAudio = Buffer.from(msg.media.payload, 'base64');
-                
-                // Fire the raw bytes directly to the correct Deepgram stream instantly
-                if (track === 'inbound' && dgInbound.readyState === WebSocket.OPEN) {
-                    dgInbound.send(rawAudio);
-                } else if (track === 'outbound' && dgOutbound.readyState === WebSocket.OPEN) {
-                    dgOutbound.send(rawAudio);
+                // Check if the user has paused the app from Flutter
+                if (getMonitoringState() === true) {
+                    const track = msg.media.track; 
+                    
+                    // Decode the base64 payload into raw binary bytes
+                    const rawAudio = Buffer.from(msg.media.payload, 'base64');
+                    
+                    // Fire the raw bytes directly to the correct Deepgram stream instantly
+                    if (track === 'inbound' && dgInbound.readyState === WebSocket.OPEN) {
+                        dgInbound.send(rawAudio);
+                    } else if (track === 'outbound' && dgOutbound.readyState === WebSocket.OPEN) {
+                        dgOutbound.send(rawAudio);
+                    }
                 }
+                // If getMonitoringState() is false, the code skips the audio sending entirely. 
+                // The packet is safely dropped, Deepgram stays silent, and you save API credits!
             }
         } catch (error) {
             console.error('Error in Node.js stream handler:', error);

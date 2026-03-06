@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dash_bubble/dash_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'services/alert_service.dart';
 import 'services/storage_service.dart';
@@ -53,6 +54,46 @@ class _AlertScreenState extends State<AlertScreen> {
     _alertService.connect(currentNgrokUrl);
   }
 
+  // 🚨 NEW: The Floating Bubble Logic
+  Future<void> _startFloatingBubble() async {
+    // 1. Ask the user for permission to draw over other apps
+    final hasPermission = await DashBubble.instance.hasOverlayPermission();
+    if (!hasPermission) {
+      await DashBubble.instance.requestOverlayPermission();
+      return; // Return early, let them grant it first
+    }
+
+    // 2. Spawn the bubble
+    await DashBubble.instance.startBubble(
+      bubbleOptions: BubbleOptions(
+        bubbleIcon: 'icon', // This must match the icon.png inside your android/app/src/main/res/drawable folder!
+        bubbleSize: 60,
+        enableClose: true,
+        distanceToClose: 100,
+      ),
+      onTap: () {
+        // 3. When the user taps the bubble, toggle the AI!
+        setState(() {
+          _alertService.toggleMonitoring();
+        });
+
+        // Show a quick native toast/snackbar so they know it worked
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _alertService.isMonitoring
+                  ? "🛡️ AI Monitoring RESUMED"
+                  : "⏸️ AI Monitoring PAUSED",
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: _alertService.isMonitoring ? const Color(0xFF6366F1) : Colors.grey,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _alertService.disconnect();
@@ -67,6 +108,12 @@ class _AlertScreenState extends State<AlertScreen> {
         backgroundColor: const Color(0xFF0F172A),
         elevation: 0,
         actions: [
+          // 🚨 NEW: Button to activate the quick-toggle bubble
+          IconButton(
+            icon: const Icon(Icons.bubble_chart, color: Colors.tealAccent),
+            tooltip: "Launch Floating Bubble",
+            onPressed: _startFloatingBubble,
+          ),
           IconButton(
             icon: const Icon(Icons.history, color: Color(0xFF6366F1)),
             onPressed: () {
