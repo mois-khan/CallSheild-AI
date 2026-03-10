@@ -1,12 +1,24 @@
-# CallShield-AI: A Real-time LLM-driven Pipeline for Social Engineering Detection
+# CallShield-AI: Real-Time Voice Phishing Detection using STT + LLM Pipelines
 
-### Abstract
-Social engineering attacks via telephonic channels have grown increasingly sophisticated, exploiting human vulnerabilities rather than technical system flaws. Current defensive paradigms rely heavily on static blacklists and post-incident reporting, creating a critical "Detection Gap" for zero-day scam campaigns and dynamic impersonation tactics during live audio streams. CallShield-AI proposes a real-time, context-aware intervention system that evaluates conversational semantics mid-flight. By orchestrating a low-latency speech-to-text pipeline with advanced Large Language Model reasoning, this system detects psychological manipulation tactics and fraudulent intent, bridging the gap between static defense and active threat neutralization.
+## Overview
 
----
+CallShield-AI is a real-time voice phishing detection prototype that analyzes
+live phone conversations using speech-to-text and large language models.
 
-### Current Implementation Status (MVP)
-The current version is a functional prototype utilizing Node.js for orchestration, Deepgram for high-speed STT, and the Gemini 1.5 Flash API for reasoning. It successfully demonstrates the end-to-end pipeline from audio ingestion to active scam notification, proving the viability of mid-call latency constraints.
+The system evaluates conversational semantics during calls to detect
+social engineering patterns such as urgency manipulation, authority
+impersonation, and financial information requests.
+
+Key components:
+
+• Speech-to-Text streaming using Deepgram  
+• Contextual reasoning using Gemini LLM  
+• WebSocket-based asynchronous pipeline  
+• Real-time scam alerts to the user
+
+Current performance:
+
+<3s detection latency    |    ~90% detection rate on simulated scam scenarios
 
 ---
 
@@ -50,7 +62,6 @@ sequenceDiagram
     end
     deactivate Orchestrator
 ```
-
 
 * **Asynchronous Processing:** Audio streams from the telecommunication layer are ingested asynchronously via persistent WebSocket connections. This prevents blocking operations and maintains the full-duplex communication required for live phone calls.
 * **STT-to-LLM Orchestration:** Continuous audio streams are piped directly into a high-speed Speech-to-Text (STT) engine. The orchestration layer manages state, buffering the transcribed text into discrete, overlapping chunks before dynamically routing them to the reasoning engine.
