@@ -62,10 +62,59 @@ sequenceDiagram
     end
     deactivate Orchestrator
 ```
+---
 
-* **Asynchronous Processing:** Audio streams from the telecommunication layer are ingested asynchronously via persistent WebSocket connections. This prevents blocking operations and maintains the full-duplex communication required for live phone calls.
-* **STT-to-LLM Orchestration:** Continuous audio streams are piped directly into a high-speed Speech-to-Text (STT) engine. The orchestration layer manages state, buffering the transcribed text into discrete, overlapping chunks before dynamically routing them to the reasoning engine.
-* **Contextual Inference:** The Gemini API serves as the core reasoning engine. Instead of relying on rigid keyword matching, it performs semantic evaluation on the dialogue's trajectory, maintaining conversational context to accurately identify sophisticated multi-stage manipulation techniques.
+#### Architectural Design Principles
+
+| Principle | Implementation |
+| :--- | :--- |
+| **Decoupled layers** | Each layer (telephony, orchestration, STT, LLM, client) communicates through well-defined interfaces (REST + WebSocket), enabling independent replacement or scaling of any single component. |
+| **Asynchronous, non-blocking I/O** | Node.js event loop + WebSocket streams ensure audio ingestion never stalls while awaiting STT or LLM responses. |
+| **Dual-channel STT** | Two independent Deepgram connections process the caller (inbound) and callee (outbound) tracks simultaneously, preserving per-speaker context for the reasoning engine. |
+| **Rolling context window** | A 15-sentence sliding buffer passed to Gemini provides sufficient conversational context without unbounded token growth, preventing API quota exhaustion. |
+| **Schema-enforced LLM output** | Gemini's `responseSchema` constraint forces structured JSON (`scam_probability`, `flagged_tactics`, `explanation`), eliminating brittle text-parsing logic. |
+| **Smart Alert Engine (client-side)** | Progressive cooldown and escalation rules on the Flutter side prevent alert fatigue while guaranteeing immediate notification on threat escalation (SUSPICIOUS → CRITICAL). |
+| **Bidirectional control channel** | The Flutter app sends `pause_monitoring` / `resume_monitoring` commands back up the WebSocket, creating a bidirectional control plane over a single persistent connection. |
+
+---
+
+#### Technology Stack
+
+| Layer | Technology | Justification |
+| :--- | :--- | :--- |
+| Telephony Gateway | **Twilio Programmable Voice** | Industry-standard PSTN programmability; supports real-time media streaming (`<Stream>`) natively. |
+| Backend Orchestration | **Node.js + Express + ws** | Non-blocking event loop ideal for high-throughput I/O; minimal overhead for WebSocket bridging. |
+| Speech-to-Text | **Deepgram Nova-2** | Sub-300 ms real-time transcription with μ-law 8 kHz support matching Twilio's codec directly. |
+| AI Reasoning | **Gemini 2.5 Flash** | Low-latency, instruction-following LLM with native structured-output (JSON schema) enforcement. |
+| Mobile Client | **Flutter (Android)** | Cross-platform Dart framework; `dash_bubble` enables persistent overlay monitoring during calls. |
+| Local Persistence | **Flutter SharedPreferences** | Lightweight key-value store sufficient for alert history; no external database dependency. |
+
+---
+
+#### Repository Structure
+
+```
+CallShield-AI/
+├── callshield_backend/          # Node.js orchestration server
+│   ├── server.js                # HTTP + WebSocket entry point
+│   ├── state.js                 # Global monitoring toggle
+│   ├── routes/
+│   │   └── callRoutes.js        # POST /api/call, POST /api/twiml
+│   ├── controllers/
+│   │   └── callController.js    # Twilio call initiation & TwiML generation
+│   └── services/
+│       └── streamHandler.js     # Deepgram bridging, context buffer, Gemini dispatch
+│
+└── callshield_app/              # Flutter Android application
+    └── lib/
+        ├── main.dart            # Alert UI + floating bubble
+        ├── history_screen.dart  # Persistent alert log
+        └── services/
+            ├── alert_service.dart         # WebSocket client + stream controller
+            ├── smart_alert_engine.dart    # Cooldown & escalation logic
+            ├── hardware_alert_service.dart# Vibration + notification triggers
+            └── storage_service.dart       # Local alert persistence
+```
 
 ---
 
