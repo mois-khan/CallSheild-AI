@@ -86,9 +86,17 @@ void onStart(ServiceInstance service) async {
           "userName": userName,
           "contacts": [sosNumber] // Sending as a list in case we add multiple later
         });
-        channel!.sink.add(handshake);
-        debugPrint("📡 [SOS] Registered emergency contacts for $userName with server!");
+        // ⏱️ Wait 1 second to ensure the Node.js server is actually listening
+        Future.delayed(const Duration(seconds: 1), () {
+          if (channel != null) {
+            channel!.sink.add(handshake);
+            debugPrint("📡 [SOS] Registered emergency contacts for $userName with server!");
+          }
+        });
+      } else {
+        debugPrint("⚠️ [SOS] No contacts found in device memory. Did you save them in the UI?");
       }
+
 
 
       channel!.stream.listen((message) {
