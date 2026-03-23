@@ -39,35 +39,16 @@ const flutterClients = new Set();
 const broadcastToFlutter = (payload) => {
     flutterClients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
+            
+            // Ensure the payload has the 'type' flag that Flutter is looking for!
+            const finalPayload = {
+                type: "ALERT",
+                ...payload
+            };
+
             // 1. Send the visual alert to the Flutter app's UI
-            client.send(JSON.stringify(payload));
-
-            // 🚨 2. THE SOS TWILIO TRIGGER 🚨
-            if (payload.threatLevel === 'CRITICAL') {
-                // Check if they have contacts saved
-                if (client.sosContacts && client.sosContacts.length > 0) {
-                    if (!client.hasSentSOS) {
-                        client.hasSentSOS = true; 
-
-                        const messageBody = `🚨 CallShield SOS 🚨\nYour contact, ${client.userName || 'a user'}, is currently on a phone call with a highly probable scammer (Threat Level: ${payload.probability}%).\n\nTactics detected: ${payload.tactics.join(', ')}.\n\nPlease call them immediately to interrupt the scam.`;
-
-                        client.sosContacts.forEach(number => {
-                            twilioClient.messages.create({
-                                body: messageBody,
-                                from: TWILIO_PHONE_NUMBER,
-                                to: number
-                            }).then(message => {
-                                console.log(`📲 [SOS] SMS sent successfully to ${number}! SID: ${message.sid}`);
-                            }).catch(err => {
-                                console.error(`❌ [SOS] Failed to send SMS to ${number}:`, err.message);
-                            });
-                        });
-                    }
-                } else {
-                    // 🚨 THE BLINDSPOT FIX: Tell us why it failed!
-                    console.log(`⚠️ [SOS] Threat is CRITICAL, but no emergency contacts are registered for this device!`);
-                }
-            }
+            client.send(JSON.stringify(finalPayload));
+            console.log(`📡 Threat Alert broadcasted to Flutter app!`);
         }
     });
 };
