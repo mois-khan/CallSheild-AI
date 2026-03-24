@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:telephony/telephony.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isMonitoring;
@@ -215,6 +216,53 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ],
                 ),
                 const SizedBox(height: 50),
+
+// ==========================================
+                // 🚨 TEMPORARY DEBUG BUTTON 🚨
+                // ==========================================
+                Center(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.send_to_mobile, color: Colors.white),
+                    label: Text(
+                      "TEST FOREGROUND SMS",
+                      style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      final String? sosNumber = prefs.getString('sosNumber');
+
+                      if (sosNumber != null && sosNumber.isNotEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Attempting to send text to $sosNumber..."))
+                        );
+
+                        try {
+                          final Telephony telephony = Telephony.instance;
+                          telephony.sendSms(
+                            to: sosNumber,
+                            message: "CallShield Debug: This is a foreground test from the main app screen.",
+                          );
+                          debugPrint("✅ [DEBUG UI] SMS command handed to OS from foreground!");
+                        } catch (e) {
+                          debugPrint("❌ [DEBUG UI] SMS Failed: $e");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red)
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Please save an SOS number first!"), backgroundColor: Colors.red)
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // ==========================================
 
                 // THE HERO SHIELD (Pulsing Radar)
                 Center(

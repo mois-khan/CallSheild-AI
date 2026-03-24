@@ -201,7 +201,7 @@ void onStart(ServiceInstance service) async {
                 final String probability = data['probability']?.toString() ?? '99';
                 final String tactics = (data['tactics'] as List?)?.join(', ') ?? 'Unknown';
 
-                String msgBody = "🚨 CallShield SOS 🚨\n${userName ?? 'A user'} is on a flagged scam call (Threat Level: $probability%).\n\nTactics detected: $tactics.\n\nPlease call them immediately to interrupt the scam.";
+                String msgBody = "CallShield SOS: ${userName ?? 'A user'} is on a highly probable scam call (Threat: $probability%). Please call them immediately to interrupt.";
 
                 debugPrint("📱 [NATIVE] Threat Critical! Firing native SMS to $sosNumber...");
 
