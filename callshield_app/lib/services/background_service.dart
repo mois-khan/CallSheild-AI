@@ -182,7 +182,7 @@ void onStart(ServiceInstance service) async {
                   'Threat Alerts',
                   importance: Importance.max,
                   priority: Priority.max,
-                  icon: 'ic_bg_service_small', // Ensure this icon exists!
+                  icon: '@mipmap/ic_launcher', // Ensure this icon exists!
                   color: const Color(0xFFEF4444),
                   fullScreenIntent: true,
                   styleInformation: BigTextStyleInformation(
@@ -204,74 +204,37 @@ void onStart(ServiceInstance service) async {
           // 🚨 3. THE NATIVE ANDROID SMS TRIGGER
           // ==========================================
           if (isCritical) {
-            if (!hasSentSOSThisSession) {
-              hasSentSOSThisSession = true;
+            final prefs = await SharedPreferences.getInstance();
+            final String? userName = prefs.getString('userName');
+            final String? sosNumber = prefs.getString('sosNumber');
 
-              final prefs = await SharedPreferences.getInstance();
-              final String? userName = prefs.getString('userName');
-              final String? sosNumber = prefs.getString('sosNumber');
+            if (sosNumber != null && sosNumber.isNotEmpty) {
+              final String probability = data['probability']?.toString() ?? '99';
+              final String tactics = (data['tactics'] as List?)?.join(', ') ?? 'Unknown';
 
-              if (sosNumber != null && sosNumber.isNotEmpty) {
-                final String probability = data['probability']?.toString() ?? '99';
-                final String tactics = (data['tactics'] as List?)?.join(', ') ?? 'Unknown';
+              String msgBody = "CallShield SOS: ${userName ?? 'A user'} is on a highly probable scam call (Threat: $probability%). Please call them immediately to interrupt.";
 
-                String msgBody = "CallShield SOS: ${userName ?? 'A user'} is on a highly probable scam call (Threat: $probability%). Please call them immediately to interrupt.";
+              debugPrint("📱 [NATIVE] Threat Critical! Firing native SMS to $sosNumber...");
 
-                debugPrint("📱 [NATIVE] Threat Critical! Firing native SMS to $sosNumber...");
+              try {
+                final smsSender = SmsSender();
 
-                try {
-                  final smsSender = SmsSender();
+                // 1. Fire the text message
+                await smsSender.sendSms(
+                  phoneNumber: sosNumber, // Make sure you type +91 in your app UI!
+                  message: msgBody,
+                );
 
-                  // 1. Fire the text message
-                  await smsSender.sendSms(
-                    phoneNumber: sosNumber,
-                    message: msgBody,
-                  );
+                debugPrint("✅ [NATIVE] SMS successfully handed to Android OS!");
 
-                  debugPrint("✅ [NATIVE] SMS successfully handed to Android OS via modern API!");
+                // ... (Keep your existing success notification code here) ...
 
-                  // 🚨 2. THE NEW SUCCESS NOTIFICATION (FIXED)
-                  await flutterLocalNotificationsPlugin.show(
-                    id: DateTime.now().millisecondsSinceEpoch.remainder(90000) + 1,
-                    title: '✅ SOS Dispatched',
-                    body: 'Emergency text message successfully sent to ${userName ?? sosNumber}.',
-                    notificationDetails: const NotificationDetails(
-                      android: AndroidNotificationDetails(
-                        'scam_alerts',
-                        'Threat Alerts',
-                        importance: Importance.max,
-                        priority: Priority.max,
-                        icon: 'ic_bg_service_small',
-                        color: Color(0xFF10B981), // Emerald Green for success!
-                      ),
-                    ),
-                  );
-
-                } catch (e) {
-                  debugPrint("❌ [NATIVE] SMS Plugin Error: $e");
-
-                  // Optional error catch notification (FIXED)
-                  await flutterLocalNotificationsPlugin.show(
-                    id: 999,
-                    title: '❌ SOS Failed',
-                    body: 'Could not send emergency text. Please check your signal or SIM balance.',
-                    notificationDetails: const NotificationDetails(
-                      android: AndroidNotificationDetails(
-                        'scam_alerts',
-                        'Threat Alerts',
-                        importance: Importance.max,
-                        priority: Priority.max,
-                        icon: 'ic_bg_service_small',
-                        color: Color(0xFFEF4444),
-                      ),
-                    ),
-                  );
-                }
-              } else {
-                debugPrint("⚠️ [NATIVE] Critical Threat, but no SOS number saved in memory!");
+              } catch (e) {
+                debugPrint("❌ [NATIVE] SMS Plugin Error: $e");
+                // ... (Keep your existing error notification code here) ...
               }
             } else {
-              debugPrint("🛡️ [NATIVE] Anti-Spam Lock Active: SMS already sent this session.");
+              debugPrint("⚠️ [NATIVE] Critical Threat, but no SOS number saved in memory!");
             }
           }
         }

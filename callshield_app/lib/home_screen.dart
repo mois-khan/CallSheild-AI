@@ -8,6 +8,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:sms_sender_background/sms_sender.dart';
 import 'live_radar_screen.dart';
 import 'package:flutter/services.dart';
+import 'services/report_service.dart'; // 🚨 NEW: Phase 4 Import
 
 class HomeScreen extends StatefulWidget {
   final bool isMonitoring;
@@ -188,10 +189,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   style: GoogleFonts.plusJakartaSans(color: Colors.grey[400]),
                 ),
                 const SizedBox(height: 24),
+
+                // 🚨 NEW: THE REPORT BUTTON FOR MANUAL USERS
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFEF4444), // Aggressive Red
+                      side: BorderSide(color: const Color(0xFFEF4444).withOpacity(0.5), width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.gavel_rounded),
+                    label: Text(
+                        "REPORT TO CYBER CELL",
+                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)
+                    ),
+                    onPressed: () async {
+                      // Uses the exact same PDF engine!
+                      await ReportService.generateAndDispatchReport(data);
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 12), // Spacer
+
+                // THE DISMISS BUTTON (Existing)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red, padding: const EdgeInsets.symmetric(vertical: 16)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[800], padding: const EdgeInsets.symmetric(vertical: 16)),
                     onPressed: () => Navigator.pop(context),
                     child: Text("DISMISS ALARM", style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
@@ -677,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 32),
 
-                  // THE DISMISS BUTTON
+                  // THE DISMISS BUTTON (Existing)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -692,7 +719,32 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       },
                       child: Text("SECURE & RETURN", style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
+                  ),
+
+                  const SizedBox(height: 12), // Spacer
+
+                  // 🚨 NEW: THE CYBER CELL COUNTER-ATTACK BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFEF4444), // Aggressive Red
+                        side: BorderSide(color: const Color(0xFFEF4444).withOpacity(0.5), width: 2),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.gavel_rounded),
+                      label: Text(
+                          "REPORT TO CYBER CELL",
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16)
+                      ),
+                      onPressed: () async {
+                        // Trigger the PDF Engine and open Email!
+                        await ReportService.generateAndDispatchReport(data);
+                      },
+                    ),
                   )
+
                 ],
               ),
             ),

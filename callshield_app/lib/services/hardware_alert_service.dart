@@ -73,7 +73,7 @@ class HardwareAlertService {
           'Threat Alerts',
           importance: Importance.max,
           priority: Priority.max,
-          // icon: 'ic_bg_service_small', // Ensure this matches your Android drawables
+          icon: '@mipmap/ic_launcher', // Ensure this matches your Android drawables
           color: Color(0xFFEF4444), // Red color
         ),
       ),

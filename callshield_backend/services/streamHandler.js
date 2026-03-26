@@ -145,7 +145,7 @@ const processTranscript = async (speaker, text, broadcastFn) => {
                 broadcastFn({
                     type: "KILL_CALL",
                     probability: analysis.scam_probability,
-                    // 🚨 NEW: Pass the full forensic data to the UI for the Receipt
+                    // 🚨 YOU MUST ADD THESE TWO LINES SO THE PDF HAS DATA!
                     tactics: analysis.flagged_tactics,
                     explanation: analysis.explanation
                 });
