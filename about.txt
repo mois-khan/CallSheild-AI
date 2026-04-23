@@ -1,5 +1,0 @@
-Today After 2 days, I'm starting working on CallShield-AI
-
-Last time I added the SOS feature, which will send sms to emergency contacts when scam is detected.
-
-But it's not working now, the problem might be with my websocket connection, I should debug the issue..
