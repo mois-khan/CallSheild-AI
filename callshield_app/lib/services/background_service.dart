@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'report_service.dart';
 
 // 🚨 UPDATE WITH YOUR NGROK URL
-const String backendUrl = "wss://concavely-inflationary-eddy.ngrok-free.dev/flutter-alerts";
+const String backendUrl = "https://callshield-ai-backend.onrender.com/flutter-alerts";
 bool hasSentSOSThisSession = false;
 
 Future<void> initializeBackgroundService() async {

@@ -61,7 +61,7 @@ class _AlertScreenState extends State<AlertScreen> {
   final StorageService _storageService = StorageService();
 
   // 🚨 UPDATE THIS WITH YOUR ACTIVE NGROK URL
-  final String currentNgrokUrl = "https://concavely-inflationary-eddy.ngrok-free.dev/flutter-alerts";
+  final String currentNgrokUrl = "https://callshield-ai-backend.onrender.com/.dev/flutter-alerts";
 
   String _lastSavedExplanation = "";
   StreamSubscription? _alertSubscription;
