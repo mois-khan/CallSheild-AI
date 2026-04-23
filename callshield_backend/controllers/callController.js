@@ -9,7 +9,7 @@ exports.initiateCall = async (req, res) => {
         const { agentNumber, customerNumber } = req.body;
         
         // HARDCODE URL FOR TESTING (As discussed)
-        const ngrokUrl = "https://concavely-inflationary-eddy.ngrok-free.dev"; 
+        const ngrokUrl = "https://callshield-ai-backend.onrender.com"; 
         
         // This is the URL Twilio will hit when you answer
         const callbackUrl = `${ngrokUrl}/api/twiml?customerNumber=${encodeURIComponent(customerNumber)}`;
@@ -40,7 +40,7 @@ exports.generateTwiml = (req, res) => {
     const customerNumber = req.query.customerNumber;
     
     // Hardcode here too just to be safe for now
-    const ngrokUrl = "https://concavely-inflationary-eddy.ngrok-free.dev"; 
+    const ngrokUrl = "https://callshield-ai-backend.onrender.com"; 
     
     // Prepare the WebSocket URL (wss://)
     // We replace 'https' with 'wss'
