@@ -12,7 +12,7 @@ function InstallGuide() {
     },
     {
       title: 'Download the APK',
-      desc: 'Click any download button on this page to get the verified callshield-ai.apk (51.5 MB) directly to your downloads directory.'
+      desc: 'Click any download button on this page to get the verified callshield-ai.apk (49.8 MB) directly to your downloads directory.'
     },
     {
       title: 'Configure Emergency Contacts',
