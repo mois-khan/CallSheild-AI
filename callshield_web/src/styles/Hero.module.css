@@ -1,0 +1,296 @@
+.heroSection {
+  position: relative;
+  width: 100%;
+  padding-top: 120px; /* Spacer for fixed Navbar */
+  overflow: hidden;
+  background: radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+}
+
+/* Glowing background blob */
+.heroSection::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.1);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  position: relative;
+  z-index: 10;
+}
+
+.content {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.tagline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+}
+
+.tagIcon {
+  animation: pulse-glow 1.5s infinite ease-in-out;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.accentText {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.description {
+  font-size: 1.15rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 36px;
+  max-width: 600px;
+}
+
+.ctaGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 48px;
+  width: 100%;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 24px;
+  width: 100%;
+}
+
+.badgeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.badgeIcon {
+  color: var(--color-primary);
+}
+
+/* Mockup display animations styling */
+.mockupContainer {
+  flex: 0.8;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.radarUi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 16px 16px;
+  height: 100%;
+}
+
+.radarHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 40px;
+}
+
+.radarDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--color-primary);
+  animation: pulse-glow 1.2s infinite;
+}
+
+.radarCircleContainer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 24px;
+}
+
+.pulseOuter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  animation: radar-pulse 3s infinite linear;
+}
+
+.pulseInner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  animation: radar-pulse 3s infinite linear;
+  animation-delay: 1.5s;
+}
+
+.radarCore {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: var(--color-surface-dark);
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+}
+
+.radarIcon {
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.5));
+}
+
+.radarStatus {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.statusTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.statusSubtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+/* Terminal Log UI on mock phone */
+.terminalContainer {
+  width: 100%;
+  flex: 1;
+  background: #05070c;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminalHeader {
+  height: 28px;
+  background: #090d16;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+}
+
+.dotRed, .dotYellow, .dotGreen {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+.dotRed { background: var(--color-scam-red); }
+.dotYellow { background: #eab308; }
+.dotGreen { background: var(--color-safety-green); }
+
+.terminalTitle {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--color-text-dim);
+  margin-left: 6px;
+}
+
+.terminalBody {
+  flex: 1;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.terminalLine {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-accent-teal);
+  animation: line-glow 0.3s ease forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .title {
+    font-size: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 40px;
+  }
+  
+  .content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .ctaGroup {
+    justify-content: center;
+  }
+
+  .badges {
+    justify-content: center;
+  }
+}

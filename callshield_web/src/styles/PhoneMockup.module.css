@@ -1,0 +1,164 @@
+.phoneFrame {
+  position: relative;
+  width: 310px;
+  height: 630px;
+  border-radius: 40px;
+  background: #000000;
+  padding: 10px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border: 4px solid #1e293b;
+  transition: all var(--transition-speed) ease;
+  user-select: none;
+}
+
+/* Base states border glow animations */
+.stateIdle {
+  border-color: #334155;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+}
+
+.stateRinging {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 35px rgba(99, 102, 241, 0.4);
+}
+
+.stateAlarm {
+  animation: threat-alarm-flash 1.5s infinite;
+}
+
+.stateDisconnected {
+  border-color: var(--color-scam-red);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+}
+
+.stateSecure {
+  border-color: var(--color-safety-green);
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.4);
+  animation: pulse-emerald 3s infinite;
+}
+
+/* Outer physical button structures */
+.buttonVolUp,
+.buttonVolDown,
+.buttonPower {
+  position: absolute;
+  width: 3px;
+  background: #475569;
+  border-radius: 3px 0 0 3px;
+  left: -7px;
+}
+
+.buttonVolUp {
+  top: 120px;
+  height: 50px;
+}
+
+.buttonVolDown {
+  top: 180px;
+  height: 50px;
+}
+
+.buttonPower {
+  left: auto;
+  right: -7px;
+  top: 150px;
+  height: 60px;
+  border-radius: 0 3px 3px 0;
+  background: #475569;
+}
+
+/* Screen wrapper within bezel */
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0b0f19;
+  border-radius: 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Simulated Android camera notch */
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 24px;
+  background: #000000;
+  border-radius: 0 0 16px 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.camera {
+  width: 8px;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 50%;
+  box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.speaker {
+  width: 40px;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+}
+
+/* System Status Bar */
+.statusBar {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 90;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+}
+
+.statusIcons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusIcon {
+  opacity: 0.85;
+}
+
+/* Renders inner viewport of the phone */
+.displayContent {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation bar at bottom of screen */
+.navBar {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+}
+
+.navPill {
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
