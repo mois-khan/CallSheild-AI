@@ -3,30 +3,44 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// --- 1. INITIATE CALL (Triggered by You) ---
+// --- 1. INITIATE CALL (Triggered by App or Postman) ---
 exports.initiateCall = async (req, res) => {
     try {
-        const { agentNumber, customerNumber } = req.body;
-        
-        // HARDCODE URL FOR TESTING (As discussed)
+        const { customerNumber } = req.body;
+
+        // Validate customer number
+        if (!customerNumber || customerNumber.trim().length === 0) {
+            console.error("❌ [CallController] Missing customerNumber in request body!");
+            return res.status(400).json({ error: "customerNumber is required in the request body." });
+        }
+
+        // Agent number is hardcoded — this is YOUR phone that rings first
+        const agentNumber = "+918184881001";
+
+        // 🔊 PROMINENT LOG — this is what you look for in Render dashboard
+        console.log(`\n===================================================`);
+        console.log(`📞 [CallController] NEW CALL REQUEST RECEIVED`);
+        console.log(`   Agent  (rings first): ${agentNumber}`);
+        console.log(`   Customer (dials after): ${customerNumber}`);
+        console.log(`   Timestamp: ${new Date().toISOString()}`);
+        console.log(`===================================================\n`);
+
         const ngrokUrl = "https://callshield-ai-backend.onrender.com"; 
-        
-        // This is the URL Twilio will hit when you answer
         const callbackUrl = `${ngrokUrl}/api/twiml?customerNumber=${encodeURIComponent(customerNumber)}`;
 
-        console.log(`[CallController] Calling Agent: ${agentNumber}`);
-        console.log(`[CallController] Callback URL will be: ${callbackUrl}`);
+        console.log(`[CallController] Callback URL: ${callbackUrl}`);
 
         const call = await client.calls.create({
             to: agentNumber,
             from: process.env.TWILIO_PHONE_NUMBER,
-            url: callbackUrl, // Twilio hits this when you pickup
+            url: callbackUrl,
         });
 
+        console.log(`✅ [CallController] Twilio Call SID: ${call.sid}`);
         return res.status(200).json({ callSid: call.sid });
 
     } catch (error) {
-        console.error("Error starting call:", error);
+        console.error("❌ [CallController] Error starting call:", error);
         return res.status(500).json({ error: error.message });
     }
 };

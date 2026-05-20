@@ -22,6 +22,16 @@ const wss = new WebSocket.Server({ server });
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// CORS — allow Flutter app and web clients to reach the API
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.sendStatus(200);
+    next();
+});
+
 app.use((req, res, next) => {
     console.log(`[Incoming Request] ${req.method} ${req.url}`);
     next();

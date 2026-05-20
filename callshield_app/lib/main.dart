@@ -13,6 +13,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'services/background_service.dart';
 
 import 'threat_dashboard.dart';
+import 'demo_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +62,7 @@ class _AlertScreenState extends State<AlertScreen> {
   final StorageService _storageService = StorageService();
 
   // 🚨 UPDATE THIS WITH YOUR ACTIVE NGROK URL
-  final String currentNgrokUrl = "https://callshield-ai-backend.onrender.com/.dev/flutter-alerts";
+  final String currentNgrokUrl = "https://callshield-ai-backend.onrender.com/flutter-alerts";
 
   String _lastSavedExplanation = "";
   StreamSubscription? _alertSubscription;
@@ -143,16 +144,26 @@ class _AlertScreenState extends State<AlertScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.play_circle_outline, color: Colors.tealAccent),
+            tooltip: "Interactive Demo",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DemoScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.bubble_chart, color: Colors.tealAccent),
             tooltip: "Launch Floating Bubble",
             onPressed: _startFloatingBubble,
           ),
           IconButton(
-            icon: const Icon(Icons.dashboard, color: Color(0xFF6366F1)), // Changed icon
+            icon: const Icon(Icons.dashboard, color: Color(0xFF6366F1)),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ThreatDashboard()), // Changed routing
+                MaterialPageRoute(builder: (context) => const ThreatDashboard()),
               );
             },
           )

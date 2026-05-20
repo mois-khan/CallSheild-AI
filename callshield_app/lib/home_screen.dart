@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'live_radar_screen.dart';
 import 'threat_dashboard.dart';
+import 'services/call_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isMonitoring;
@@ -322,6 +323,130 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  // 📞 REQUEST CALL DIALOG
+  void _showRequestCallDialog() {
+    final phoneController = TextEditingController();
+    bool isLoading = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1E1E2A),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40, height: 4,
+                        decoration: BoxDecoration(color: Colors.grey[700], borderRadius: BorderRadius.circular(2)),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Request Test Call",
+                      style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Enter the customer phone number to dial. The agent phone (+91 81848 81001) will ring first.",
+                      style: GoogleFonts.plusJakartaSans(color: Colors.grey[400], fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      style: GoogleFonts.firaCode(color: Colors.white, fontSize: 16),
+                      decoration: InputDecoration(
+                        hintText: "+91 XXXXX XXXXX",
+                        hintStyle: GoogleFonts.firaCode(color: Colors.grey[600]),
+                        prefixIcon: const Icon(Icons.phone, color: Color(0xFF6366F1)),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF6366F1)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6366F1),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: isLoading ? null : () async {
+                          final number = phoneController.text.trim();
+                          if (number.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please enter a phone number"), backgroundColor: Colors.red),
+                            );
+                            return;
+                          }
+
+                          setModalState(() => isLoading = true);
+
+                          final result = await CallService.requestCall(number);
+
+                          setModalState(() => isLoading = false);
+
+                          if (context.mounted) Navigator.pop(context);
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  result["success"] ? "✅ ${result["message"]}" : "❌ ${result["message"]}",
+                                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: result["success"] ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        icon: isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Icon(Icons.call, size: 20),
+                        label: Text(
+                          isLoading ? "Connecting..." : "Initiate Call",
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isSystemActive = widget.isMonitoring && _liveConnectionStatus;
@@ -540,6 +665,50 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     value: isGrandmaModeEnabled,
                     activeColor: const Color(0xFFEF4444),
                     onChanged: _toggleGrandmaMode,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // 📞 REQUEST TEST CALL CARD
+                GestureDetector(
+                  onTap: _showRequestCallDialog,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E2A),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6366F1).withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.phone_callback_rounded, color: Color(0xFF6366F1), size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Request Test Call",
+                                style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Initiate a live monitored call via Twilio",
+                                style: GoogleFonts.plusJakartaSans(color: Colors.grey[400], fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),

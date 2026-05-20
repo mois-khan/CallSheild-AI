@@ -40,7 +40,9 @@ const warmUpGemini = async () => {
     try {
         await evaluateWithGemini("[SYSTEM]: Network warmup ping. Ignore.");
         console.log(`✅ [SYSTEM] Gemini connection established (Warmup finished).`);
-    } catch (error) {}
+    } catch (error) {
+        console.error("❌ [SYSTEM] Gemini connection warm-up failed:", error);
+    }
 };
 
 const api = process.env.DEEPGRAM_API_KEY;
@@ -79,8 +81,11 @@ const handleStream = (ws, broadcastFn) => {
             newSentenceCount = 0;
             newWordCount = 0;
 
+            console.log(`🧠 [Gemini AI] Evaluating transcript payload:\n${transcriptPayload}`);
+
             try {
                 const analysis = await evaluateWithGemini(transcriptPayload);
+                console.log(`🧠 [Gemini AI] Verdict received:`, JSON.stringify(analysis, null, 2));
 
                 // Update Session Aggregates
                 if (analysis.scam_probability > activeSession.maxThreatLevel) {
@@ -106,6 +111,7 @@ const handleStream = (ws, broadcastFn) => {
                 }
                 isGeminiProcessing = false; 
             } catch (error) {
+                console.error("❌ [Gemini AI] Evaluation failed:", error);
                 isGeminiProcessing = false; 
             }
         }
